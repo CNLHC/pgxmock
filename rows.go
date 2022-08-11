@@ -21,6 +21,14 @@ var CSVColumnParser = func(s string) interface{} {
 	return s
 }
 
+func NewRowSets(rows []*Rows) *rowSets {
+	return &rowSets{
+		sets: rows,
+		pos:  0,
+		ex:   &ExpectedQuery{},
+	}
+}
+
 type rowSets struct {
 	sets []*Rows
 	pos  int
