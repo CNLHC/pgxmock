@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"testing"
 	"time"
 
 	"github.com/jackc/pgconn"
@@ -145,6 +146,7 @@ type pgxmock struct {
 	ordered      bool
 	queryMatcher QueryMatcher
 	monitorPings bool
+	t            *testing.T
 
 	expected []expectation
 }
@@ -287,7 +289,7 @@ func (c *pgxmock) NewColumn(name string) *pgproto3.FieldDescription {
 }
 
 // open a mock database driver connection
-func (c *pgxmock) open(options []func(*pgxmock) error) error {
+func (c *pgxmock) open(options []MockOptFn) error {
 	for _, option := range options {
 		err := option(c)
 		if err != nil {

@@ -3,6 +3,7 @@ package pgxmock
 import (
 	"context"
 	"errors"
+	"testing"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -11,12 +12,14 @@ type pgxmockConn struct {
 	pgxmock
 }
 
+type MockOptFn func(*pgxmock) error
+
 // NewConn creates PgxConnIface database connection and a mock to manage expectations.
 // Accepts options, like ValueConverterOption, to use a ValueConverter from
 // a specific driver.
 // Pings db so that all expectations could be
 // asserted.
-func NewConn(options ...func(*pgxmock) error) (PgxConnIface, error) {
+func NewConn(options ...MockOptFn) (PgxConnIface, error) {
 	smock := &pgxmockConn{}
 	smock.ordered = true
 	return smock, smock.open(options)
@@ -24,6 +27,13 @@ func NewConn(options ...func(*pgxmock) error) (PgxConnIface, error) {
 
 func (c *pgxmockConn) Close(ctx context.Context) error {
 	return c.close(ctx)
+}
+
+func WithTestingReporter(t *testing.T) MockOptFn {
+	return func(p *pgxmock) error {
+		p.t = t
+		return nil
+	}
 }
 
 type pgxmockPool struct {
@@ -35,7 +45,7 @@ type pgxmockPool struct {
 // a specific driver.
 // Pings db so that all expectations could be
 // asserted.
-func NewPool(options ...func(*pgxmock) error) (PgxPoolIface, error) {
+func NewPool(options ...MockOptFn) (PgxPoolIface, error) {
 	smock := &pgxmockPool{}
 	smock.ordered = true
 	return smock, smock.open(options)
