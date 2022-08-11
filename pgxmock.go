@@ -681,7 +681,11 @@ func (c *pgxmock) Rollback(ctx context.Context) error {
 		if fulfilled == len(c.expected) {
 			msg = "all expectations were already fulfilled, " + msg
 		}
-		return fmt.Errorf(msg)
+		err := fmt.Errorf(msg)
+		if c.t != nil {
+			c.t.Error(err)
+		}
+		return err
 	}
 
 	expected.triggered = true
