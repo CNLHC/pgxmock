@@ -752,7 +752,11 @@ func (c *pgxmock) query(query string, args []interface{}) (*ExpectedQuery, error
 		if fulfilled == len(c.expected) {
 			msg = "all expectations were already fulfilled, " + msg
 		}
-		return nil, fmt.Errorf(msg, query, args)
+		err := fmt.Errorf(msg, query, args)
+		if c.t != nil {
+			c.t.Error(err)
+		}
+		return nil, err
 	}
 
 	defer expected.Unlock()
